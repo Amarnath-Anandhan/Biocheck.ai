@@ -2,6 +2,9 @@
 
 BioCheckAI is a Flask-based prototype for validating FASTA and VCF files and reporting consistency issues, errors, and warnings in a user-friendly report.
 
+## About
+BioCheckAI was built to help researchers and students quickly verify that FASTA and VCF inputs are consistent before downstream analysis. It focuses on practical, human-readable feedback and highlights the most common data quality issues (missing headers, invalid positions, contig mismatches, and reference inconsistencies) in a simple web interface.
+
 ## Features
 - Upload FASTA/VCF files or paste content directly.
 - FASTA validation (headers, duplicates, invalid characters).
