@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Biocheck.Ai</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+        }
+
+        .title {
+            text-align: center;
+            margin-top: 80px;
+            font-size: 48px;
+        }
+
+        .module_1 {
+            position: relative;   /* fixed: was display:relative */
+            padding: 30px;
+            border: 1px solid #000;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .heading {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .desc {
+            font-size: 16px;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            font-size: 16px;
+            text-decoration: none;
+            color: white;
+            background-color: #007bff;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <h1 class="title">Biocheck.Ai</h1>
+
+    <div class="module_1">
+        <h2 class="heading">File Consistency Checker</h2>
+        <p class="desc">Check the file consistency of FASTA and VCF files</p>
+
+        <!-- Correct way to navigate -->
+        <a class="btn" href="/upload">Start checking</a>
+    </div>
+
+</body>
+</html>

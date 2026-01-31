@@ -1,0 +1,322 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Results - Biocheck.Ai</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+        }
+
+        .title {
+            text-align: center;
+            margin-top: 60px;
+            font-size: 40px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .summary {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            background: #fafafa;
+        }
+
+        .status-pill {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: white;
+            margin-left: 8px;
+        }
+
+        .ok { background: #28a745; }
+        .warn { background: #ffc107; color: #000; }
+        .err { background: #dc3545; }
+
+        .section-title {
+            margin-top: 25px;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        .issue {
+            border: 1px solid #ddd;
+            border-left: 6px solid #dc3545;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 12px;
+            background: #fff;
+        }
+
+        .issue-warning {
+            border-left-color: #ffc107;
+            background: #fffdf3;
+        }
+
+        .issue-ok {
+            border-left-color: #28a745;
+            background: #f3fff7;
+        }
+
+        .issue-title {
+            font-weight: bold;
+            margin: 0 0 8px 0;
+            font-size: 16px;
+        }
+
+        .issue-text {
+            margin: 6px 0;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .hint {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            background: #f8f9fa;
+            border: 1px dashed #ccc;
+        }
+
+        .btn-row {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            font-size: 16px;
+            text-decoration: none;
+            color: white;
+            background-color: #007bff;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .small {
+            font-size: 14px;
+            color: #666;
+        }
+
+        ul {
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1 class="title">Check Results</h1>
+
+    <div class="container">
+
+        <!-- =======================
+             SUMMARY (STATIC + JINJA)
+             ======================= -->
+
+        <!-- If Flask passes a report dict, this block will show real values -->
+        {% if report %}
+        <div class="summary">
+            <div>
+                <b>Status:</b>
+                {% if report.summary.status == "OK" %}
+                    <span class="status-pill ok">OK</span>
+                {% elif report.summary.status == "WARNING" %}
+                    <span class="status-pill warn">WARNING</span>
+                {% else %}
+                    <span class="status-pill err">ERROR</span>
+                {% endif %}
+            </div>
+            <div class="small" style="margin-top:8px;">
+                <b>Errors:</b> {{ report.summary.error_count }} |
+                <b>Warnings:</b> {{ report.summary.warning_count }}
+            </div>
+        </div>
+        {% else %}
+        <!-- If no Flask data exists yet, show a prototype placeholder -->
+        <div class="summary">
+            <div>
+                <b>Status:</b>
+                <span class="status-pill err">ERROR</span>
+            </div>
+            <div class="small" style="margin-top:8px;">
+                <b>Errors:</b> 2 | <b>Warnings:</b> 1
+            </div>
+            <div class="small" style="margin-top:8px;">
+                Prototype mode: this is a sample output layout.
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- =======================
+             ERRORS SECTION
+             ======================= -->
+        <h2 class="section-title">Errors (Must Fix)</h2>
+
+        {% if report and report.errors and report.errors|length > 0 %}
+            {% for e in report.errors %}
+            <div class="issue">
+                <p class="issue-title">{{ e.title if e.title else "Error" }}</p>
+
+                <p class="issue-text"><b>Problem:</b> {{ e.details }}</p>
+
+                {% if e.where %}
+                <p class="issue-text small">
+                    <b>Where:</b>
+                    {{ e.where.file }}
+                    {% if e.where.contig %} | {{ e.where.contig }}{% endif %}
+                    {% if e.where.pos %} | POS {{ e.where.pos }}{% endif %}
+                    {% if e.where.line %} | Line {{ e.where.line }}{% endif %}
+                    {% if e.where.line_ranges %}
+                        | Lines
+                        {% for r in e.where.line_ranges %}
+                            {% if r[0] == "..." %}
+                                ...
+                            {% elif r[0] == r[1] %}
+                                {{ r[0] }}
+                            {% else %}
+                                {{ r[0] }}-{{ r[1] }}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </p>
+                {% endif %}
+
+                {% if e.fix %}
+                <div class="hint">
+                    <b>Fix:</b> {{ e.fix }}
+                </div>
+                {% endif %}
+
+                {% if e.verify %}
+                <div class="hint" style="margin-top:10px;">
+                    <b>Verify:</b> {{ e.verify }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <!-- Static demo errors (for now) -->
+            <div class="issue">
+                <p class="issue-title">Contig naming mismatch</p>
+                <p class="issue-text"><b>Problem:</b> FASTA uses <b>1</b> but VCF uses <b>chr1</b>.</p>
+                <div class="hint">
+                    <b>Fix:</b> Rename VCF contigs to match FASTA headers OR use the correct reference FASTA.
+                </div>
+                <div class="hint" style="margin-top:10px;">
+                    <b>Verify:</b> After fixing, all CHROM values in VCF must exist in FASTA headers.
+                </div>
+            </div>
+
+            <div class="issue">
+                <p class="issue-title">Position out of range</p>
+                <p class="issue-text"><b>Problem:</b> VCF contains a POS larger than the contig length in FASTA.</p>
+                <div class="hint">
+                    <b>Fix:</b> Use the matching reference or correct the VCF source (wrong genome build).
+                </div>
+                <div class="hint" style="margin-top:10px;">
+                    <b>Verify:</b> Confirm all variant positions are within the FASTA contig lengths.
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- =======================
+             WARNINGS SECTION (optional)
+             ======================= -->
+        <h2 class="section-title">Warnings (Risky)</h2>
+
+        {% if report and report.warnings and report.warnings|length > 0 %}
+            {% for w in report.warnings %}
+            <div class="issue issue-warning">
+                <p class="issue-title">{{ w.title if w.title else "Warning" }}</p>
+                <p class="issue-text"><b>What looks risky:</b> {{ w.details }}</p>
+
+                {% if w.fix %}
+                <div class="hint">
+                    <b>Suggestion:</b> {{ w.fix }}
+                </div>
+                {% endif %}
+
+                {% if w.verify %}
+                <div class="hint" style="margin-top:10px;">
+                    <b>Verify:</b> {{ w.verify }}
+                </div>
+                {% endif %}
+                {% if w.where and w.where.line_ranges %}
+                <p class="issue-text small">
+                    <b>Where:</b>
+                    {{ w.where.file }}
+                    | Lines
+                    {% for r in w.where.line_ranges %}
+                        {% if r[0] == "..." %}
+                            ...
+                        {% elif r[0] == r[1] %}
+                            {{ r[0] }}
+                        {% else %}
+                            {{ r[0] }}-{{ r[1] }}
+                        {% endif %}
+                    {% endfor %}
+                </p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="issue issue-warning">
+                <p class="issue-title">No warnings (prototype)</p>
+                <p class="issue-text">Warnings will appear here when your checker flags risky patterns.</p>
+            </div>
+        {% endif %}
+
+        <!-- =======================
+             PASSED CHECKS (optional)
+             ======================= -->
+        <h2 class="section-title">Passed Checks</h2>
+
+        {% if report and report.passed and report.passed|length > 0 %}
+            <div class="issue issue-ok">
+                <ul>
+                    {% for p in report.passed %}
+                        <li>{{ p }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% else %}
+            <div class="issue issue-ok">
+                <ul>
+                    <li>FASTA format readable</li>
+                    <li>VCF header detected</li>
+                    <li>Basic columns present</li>
+                </ul>
+            </div>
+        {% endif %}
+
+        <div class="btn-row">
+            <a class="btn" href="/upload">Go Back</a>
+        </div>
+
+    </div>
+
+</body>
+</html>
+
